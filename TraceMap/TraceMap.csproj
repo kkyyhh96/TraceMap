@@ -47,6 +47,9 @@
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Npgsql">
+      <HintPath>..\..\get_library_seat\get_library_seat\get_library_seat\bin\Debug\Npgsql.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -89,6 +92,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="HomePage.html" />
+    <Content Include="jquery-1.10.2.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -97,10 +102,18 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryTraceData.ashx.cs">
+      <DependentUpon>QueryTraceData.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="QueryTraceDataFromTime.ashx.cs">
+      <DependentUpon>QueryTraceDataFromTime.ashx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
     <Content Include="packages.config" />
+    <Content Include="QueryTraceData.ashx" />
+    <Content Include="QueryTraceDataFromTime.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

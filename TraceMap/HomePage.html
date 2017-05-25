@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, .searchText {
+            width: 50px;
+        }
+
+        body, html, #allmap {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: "微软雅黑";
+        }
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=oCSX3yaczXBYFwsFIvsCoHpTQN6sDFcm"></script>
+    <script type="text/javascript" src="./jquery-1.10.2.js"></script>
+    <title>轨迹地图</title>
+</head>
+<body>
+    轨迹查询<br />
+    起始时间：    <input id="yearText" value="2017" class="searchText" />年
+    <input id="monthText" value="6" class="searchText" />月
+    <input id="dayText" value="" class="searchText" />日
+    <input id="hourText" value="" class="searchText" />时
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    终止时间：    <input id="yearText2" value="2017" class="searchText" />年
+    <input id="monthText2" value="6" class="searchText" />月
+    <input id="dayText2" value="" class="searchText" />日
+    <input id="hourText2" value="" class="searchText" />时
+    <button id="searchBtn">查询轨迹</button>
+    <button id="distanceBtn">查询距离</button>
+    <hr />
+    <div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");    // 创建Map实例
+    map.centerAndZoom(new BMap.Point(114.368946, 30.539753), 14);  // 初始化地图,设置中心点坐标和地图级别
+    map.addControl(new BMap.MapTypeControl());   //添加地图类型控件
+    map.setCurrentCity("武汉");          // 设置地图显示的城市 此项是必须设置的
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+    var polylineAll = new BMap.Polyline([], { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });;
+    var polylinePart = new BMap.Polyline([], { strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.5 });;
+
+    //查询轨迹
+    function query_trace() {
+        //创建点集
+        var pointArray = [];
+        $.ajax({
+            url: "./QueryTraceData.ashx?username=1",
+            success: function (result) {
+                //读取数据
+                var pts = result.split('\n');
+                for (var i = 0; i < pts.length - 1; i++) {
+                    var pt = new BMap.Point(pts[i].split(' ')[0], pts[i].split(' ')[1]);
+                    //将点添加入折线中
+                    pointArray.push(pt);
+                }
+                //新建折线
+                polylineAll = new BMap.Polyline(pointArray, { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });
+
+                //数据显示
+                map.addOverlay(polylineAll);
+            }
+        })
+    }
+
+    //根据时间查询部分轨迹
+    function query_trace_time(sY, sM, sD, sH, sm, eY, eM, eD, eH, em) {
+        //创建点集
+        var pointArray = [];
+        $.ajax({
+            url: "./QueryTraceDataFromTime.ashx?username=1&sY=" + sY + "&sM="
+            + sM + "&sD=" + sD + "&sH=" + sH + "&sm=" + sm + "&eY=" + eY +
+            "&eM=" + eM + "&eD=" + eD + "&eH=" + eH + "&em=" + em,
+            success: function (result) {
+                //读取数据
+                var pts = result.split('\n');
+                for (var i = 0; i < pts.length - 1; i++) {
+                    var pt = new BMap.Point(pts[i].split(' ')[0], pts[i].split(' ')[1]);
+                    //将点添加入折线中
+                    pointArray.push(pt);
+                }
+                //新建折线
+                polylinePart = new BMap.Polyline(pointArray, { strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.5 });
+
+                //数据显示
+                map.addOverlay(polylinePart);
+            }
+        })
+    }
+
+    query_trace();
+    /*
+    //测量轨迹距离
+    function query_distance(polyline) {
+        //创建点集
+        var ptsArray = [];
+        ptsArray = polyline.getPath();
+        var pt1, pt2, distance = 0;
+        for (var i = 0; i < ptsArray.length - 1; i++) {
+            pt1 = ptsArray[i];
+            pt2 = ptsArray[i + 1];
+            distance += map.getDistance(pt1, pt2);
+        }
+        alert(distance);
+    }
+    query_distance(polylineAll);
+    */
+</script>
+</html>
