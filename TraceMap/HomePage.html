@@ -30,8 +30,8 @@
     <input id="monthText2" value="6" class="searchText" />月
     <input id="dayText2" value="" class="searchText" />日
     <input id="hourText2" value="" class="searchText" />时
-    <button id="searchBtn">查询轨迹</button>
-    <button id="distanceBtn">查询距离</button>
+    <button id="searchBtn" onclick="query_trace_time()">查询轨迹</button>
+    <button id="distanceBtn" onclick="query_distance()">查询距离</button>
     <hr />
     <div id="allmap"></div>
 </body>
@@ -63,7 +63,6 @@
                 }
                 //新建折线
                 polylineAll = new BMap.Polyline(pointArray, { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });
-
                 //数据显示
                 map.addOverlay(polylineAll);
             }
@@ -71,13 +70,23 @@
     }
 
     //根据时间查询部分轨迹
-    function query_trace_time(sY, sM, sD, sH, sm, eY, eM, eD, eH, em) {
+    function query_trace_time() {
+        var sY = document.getElementById("yearText").value;
+        var sM = document.getElementById("monthText").value;
+        var sD = document.getElementById("dayText").value;
+        var sH = document.getElementById("hourText").value;
+        if (sD == "") sD = 0; if (sH == "") sH = 0;
+        var eY = document.getElementById("yearText2").value;
+        var eM = document.getElementById("monthText2").value;
+        var eD = document.getElementById("dayText2").value;
+        var eH = document.getElementById("hourText2").value;
+        if (eD == "") eD = 0; if (eH == "") eH = 0;
         //创建点集
         var pointArray = [];
         $.ajax({
             url: "./QueryTraceDataFromTime.ashx?username=1&sY=" + sY + "&sM="
-            + sM + "&sD=" + sD + "&sH=" + sH + "&sm=" + sm + "&eY=" + eY +
-            "&eM=" + eM + "&eD=" + eD + "&eH=" + eH + "&em=" + em,
+            + sM + "&sD=" + sD + "&sH=" + sH + "&eY=" + eY +
+            "&eM=" + eM + "&eD=" + eD + "&eH=" + eH,
             success: function (result) {
                 //读取数据
                 var pts = result.split('\n');
@@ -90,27 +99,25 @@
                 polylinePart = new BMap.Polyline(pointArray, { strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.5 });
 
                 //数据显示
+                map.clearOverlays();
                 map.addOverlay(polylinePart);
             }
         })
     }
 
     query_trace();
-    /*
     //测量轨迹距离
-    function query_distance(polyline) {
+    function query_distance() {
         //创建点集
         var ptsArray = [];
-        ptsArray = polyline.getPath();
+        ptsArray = polylinePart.getPath();
         var pt1, pt2, distance = 0;
         for (var i = 0; i < ptsArray.length - 1; i++) {
             pt1 = ptsArray[i];
             pt2 = ptsArray[i + 1];
             distance += map.getDistance(pt1, pt2);
         }
-        alert(distance);
+        alert("该条轨迹的距离为:" + parseInt(distance) + "m");
     }
-    query_distance(polylineAll);
-    */
 </script>
 </html>
