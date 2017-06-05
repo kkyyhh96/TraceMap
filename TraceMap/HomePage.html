@@ -14,13 +14,32 @@
             overflow: hidden;
             font-family: "微软雅黑";
         }
+
+        .amap-marker .marker-route {
+            position: absolute;
+            width: 40px;
+            height: 44px;
+            color: #e90000;
+            background: url(http://webapi.amap.com/theme/v1.3/images/newpc/poi-1.png) no-repeat;
+            cursor: pointer;
+        }
+
+        .amap-marker .marker-marker-bus-from {
+            background-position: -334px -180px;
+        }
+
+        .amap-marker .marker-marker-bus-end {
+            background-position: -334px -135px;
+        }
     </style>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=oCSX3yaczXBYFwsFIvsCoHpTQN6sDFcm"></script>
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=ddaa649f607651db5b005dded9f9e863"></script>
     <script type="text/javascript" src="./jquery-1.10.2.js"></script>
-    <title>轨迹地图</title>
+    <title>知迹</title>
 </head>
 <body>
     轨迹查询<br />
+    用户名：    <input id="username" class="searchText" />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     起始时间：    <input id="yearText" value="2017" class="searchText" />年
     <input id="monthText" value="6" class="searchText" />月
     <input id="dayText" value="" class="searchText" />日
@@ -32,12 +51,119 @@
     <input id="hourText2" value="" class="searchText" />时
     <button id="searchBtn" onclick="query_trace_time()">查询轨迹</button>
     <button id="distanceBtn" onclick="query_distance()">查询距离</button>
+    <button id="chartBtn" onclick="query_chart()">统计图表</button>
     <hr />
     <div id="allmap"></div>
+    <div id="chart"></div>
 </body>
 </html>
 <script type="text/javascript">
     // 百度地图API功能
+    var map = new AMap.Map('allmap', {
+        resizeEnable: true,
+        zoom: 14,
+        center: [114.368946, 30.539753]
+    });
+
+    var polylineAll = new AMap.Polyline({ path: [], strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });;
+    var polylinePart = new AMap.Polyline({ path: [], strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.5 });;
+    var username = 233;
+    //var username = 1;
+
+    //查询轨迹
+    function query_trace() {
+        //创建点集
+        var pointArray = [];
+        $.ajax({
+            url: "./QueryTraceData.ashx?username=" + username,
+            success: function (result) {
+                //读取数据
+                var pts = result.split('\n');
+                for (var i = 0; i < pts.length - 1; i++) {
+                    var pt = [pts[i].split(' ')[1], pts[i].split(' ')[0]];
+                    //将点添加入折线中
+                    pointArray.push(pt);
+                }
+                //新建折线
+                polylineAll = new AMap.Polyline({ path: pointArray, strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });;
+
+                createPtIcon(pointArray);
+                //数据显示
+                map.add(polylineAll);
+            }
+        })
+    }
+    query_trace();
+    function createPtIcon(pointArray) {
+        //新建始末点
+        var startPt = new AMap.Marker({ map: map, position: pointArray[0], content: '<div class="marker-route marker-marker-bus-from"></div>' });
+        var endPt = new AMap.Marker({ map: map, position: pointArray[pointArray.length - 1], content: '<div class="marker-route marker-marker-bus-end"></div>' });
+    }
+
+    //根据时间查询部分轨迹
+    function query_trace_time() {
+        var username = document.getElementById("username").value;
+        var sY = document.getElementById("yearText").value;
+        var sM = document.getElementById("monthText").value;
+        var sD = document.getElementById("dayText").value;
+        var sH = document.getElementById("hourText").value;
+        if (sD == "") sD = 0; if (sH == "") sH = 0;
+        var eY = document.getElementById("yearText2").value;
+        var eM = document.getElementById("monthText2").value;
+        var eD = document.getElementById("dayText2").value;
+        var eH = document.getElementById("hourText2").value;
+        if (eD == "") eD = 0; if (eH == "") eH = 0;
+        //创建点集
+        var pointArray = [];
+        $.ajax({
+            url: "./QueryTraceDataFromTime.ashx?username=" + username + "&sY=" + sY + "&sM="
+            + sM + "&sD=" + sD + "&sH=" + sH + "&eY=" + eY +
+            "&eM=" + eM + "&eD=" + eD + "&eH=" + eH,
+            success: function (result) {
+                //读取数据
+                var pts = result.split('\n');
+                for (var i = 0; i < pts.length - 1; i++) {
+                    var pt = [pts[i].split(' ')[1], pts[i].split(' ')[0]];
+                    //将点添加入折线中
+                    pointArray.push(pt);
+                }
+                //新建折线
+                polylinePart = new AMap.Polyline({ path: pointArray, strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.5 });
+                createPtIcon(pointArray);
+                //数据显示
+                map.clearMap();
+                map.add(polylinePart);
+            }
+        })
+    }
+
+    //测量轨迹距离
+    function query_distance() {
+        //创建点集
+        var ptsArray = [];
+        ptsArray = polylinePart.getPath();
+        var pt1, pt2, distance = 0;
+        for (var i = 0; i < ptsArray.length - 1; i++) {
+            pt1 = ptsArray[i];
+            pt2 = ptsArray[i + 1];
+            var ptLng = new AMap.LngLat(pt1["lng"], pt1["lat"]);
+            distance += ptLng.distance(pt2);
+        }
+        alert("该条轨迹的距离为:" + parseInt(distance) + "m");
+    }
+
+    //获取下一天
+    function getNextDay(d) {
+        d = new Date(d);
+        d = +d + 1000 * 60 * 60 * 24;
+        d = new Date(d);
+        //return d;
+        //格式化
+        return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    }
+
+    function 
+    /*
     var map = new BMap.Map("allmap");    // 创建Map实例
     map.centerAndZoom(new BMap.Point(114.368946, 30.539753), 14);  // 初始化地图,设置中心点坐标和地图级别
     map.addControl(new BMap.MapTypeControl());   //添加地图类型控件
@@ -46,18 +172,21 @@
 
     var polylineAll = new BMap.Polyline([], { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });;
     var polylinePart = new BMap.Polyline([], { strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.5 });;
+    var username = 233;
+    */
 
+    /*
     //查询轨迹
     function query_trace() {
         //创建点集
         var pointArray = [];
         $.ajax({
-            url: "./QueryTraceData.ashx?username=1",
+            url: "./QueryTraceData.ashx?username=" + username,
             success: function (result) {
                 //读取数据
                 var pts = result.split('\n');
                 for (var i = 0; i < pts.length - 1; i++) {
-                    var pt = new BMap.Point(pts[i].split(' ')[0], pts[i].split(' ')[1]);
+                    var pt = new BMap.Point(pts[i].split(' ')[1], pts[i].split(' ')[0]);
                     //将点添加入折线中
                     pointArray.push(pt);
                 }
@@ -119,5 +248,6 @@
         }
         alert("该条轨迹的距离为:" + parseInt(distance) + "m");
     }
+    */
 </script>
 </html>
