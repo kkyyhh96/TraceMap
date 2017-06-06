@@ -103,6 +103,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryDistanceForChart.ashx.cs">
+      <DependentUpon>QueryDistanceForChart.ashx</DependentUpon>
+    </Compile>
     <Compile Include="QueryTraceData.ashx.cs">
       <DependentUpon>QueryTraceData.ashx</DependentUpon>
     </Compile>
@@ -115,6 +118,7 @@
     <Content Include="packages.config" />
     <Content Include="QueryTraceData.ashx" />
     <Content Include="QueryTraceDataFromTime.ashx" />
+    <Content Include="QueryDistanceForChart.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

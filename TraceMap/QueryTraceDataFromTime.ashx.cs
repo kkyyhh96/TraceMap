@@ -49,24 +49,5 @@ namespace TraceMap
 
             return result;
         }
-
-        public class TimeStamp
-        {
-            int year, month, day, hour;
-            public TimeStamp(string year, string month, string day, string hour)
-            {
-                this.year = Convert.ToInt32(year);
-                this.month = Convert.ToInt32(month);
-                this.day = Convert.ToInt32(day);
-                this.hour = Convert.ToInt32(hour);
-            }
-            public string GetTime
-            {
-                get
-                {
-                    return String.Format("{0}-{1}-{2} {3}:00", year, month, day, hour);
-                }
-            }
-        }
     }
 }
