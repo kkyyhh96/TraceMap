@@ -91,10 +91,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="echarts.js" />
     <Content Include="Global.asax" />
     <Content Include="HomePage.html" />
     <Content Include="jquery-1.10.2.js" />
-    <Content Include="start.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
